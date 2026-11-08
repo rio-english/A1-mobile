@@ -103,4 +103,28 @@ document.body.setAttribute('data-ready','1');</script><style id="rio-dev">html{-
 .top .tip{display:none!important}.top{padding:6px 8px!important;gap:6px!important}
 .top button,.top select{font-size:14px!important;padding:7px 9px!important;min-height:34px}
 .top b{font-size:15px!important}
-#rio-back{left:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;font-size:16px!important;padding:12px 16px!important}</style><a id="rio-back" href="../index.html" style="position:fixed;left:12px;bottom:12px;z-index:99999;background:#1C2541;color:#fff;font:700 15px/1 system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;padding:10px 14px;border-radius:999px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:.92">← 目录</a></body></html>
+#rio-back{left:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;font-size:16px!important;padding:12px 16px!important}</style><a id="rio-back" href="../index.html" style="position:fixed;left:12px;bottom:12px;z-index:99999;background:#1C2541;color:#fff;font:700 15px/1 system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;padding:10px 14px;border-radius:999px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:.92">← 目录</a><script>(function(){
+var T=window.speechSynthesis,V=null,CUR=null,warned={};
+function toast(m,k){if(k&&warned[k])return;if(k)warned[k]=1;var d=document.createElement('div');d.textContent=m;
+ d.style.cssText='position:fixed;left:10px;right:10px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:99999;background:#1C2541;color:#fff;font:600 15px/1.5 system-ui,sans-serif;padding:12px 14px;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.35)';
+ document.body.appendChild(d);setTimeout(function(){d.remove()},7000)}
+window.rioToast=toast;
+if(!T||!window.SpeechSynthesisUtterance){window.say=function(){toast('这个浏览器不能朗读英文。请用 Chrome 打开本网站（Samsung 自带浏览器朗读不稳定）。','nb')};return}
+function pick(){var vs=T.getVoices()||[],en=vs.filter(function(v){return /^en[-_]US/i.test(v.lang)});if(!en.length)en=vs.filter(function(v){return /^en/i.test(v.lang)});
+ var pref=[/samantha/i,/ava/i,/allison/i,/aria/i,/jenny/i,/google us english/i,/english united states/i,/female/i];V=null;
+ for(var i=0;i<pref.length&&!V;i++)V=en.filter(function(v){return pref[i].test(v.name)})[0]||null;if(!V)V=en[0]||null;return vs.length}
+pick();if(T.addEventListener)T.addEventListener('voiceschanged',pick);else T.onvoiceschanged=pick;
+window.say=function(t,el){if(window.RIO_TTS_ON===false)return;if(!t)return;
+ if(!pick()&&!V){setTimeout(function(){pick()},300)}
+ var u=new SpeechSynthesisUtterance(t),started=false;u.lang='en-US';if(V)u.voice=V;u.rate=.85;
+ if(CUR)CUR.classList.remove('play');CUR=el;if(el)el.classList.add('play');
+ u.onstart=function(){started=true};u.onend=function(){if(el)el.classList.remove('play')};
+ u.onerror=function(e){if(el)el.classList.remove('play');if(e.error==='interrupted'||e.error==='canceled')return;
+  toast('朗读没有成功（'+e.error+'）。请检查：① 媒体音量；② 设置 → 常规管理 → 文字转语音，首选引擎选 Google，并下载“英语（美国）”语音。','err')};
+ var go=function(){T.speak(u);try{T.resume()}catch(x){}
+  setTimeout(function(){if(!started&&!T.speaking){try{T.resume()}catch(x){}}},400);
+  setTimeout(function(){if(!started&&!T.speaking){if(el)el.classList.remove('play');
+   toast(V?'没有听到声音？请调大媒体音量；仍然没有，请到 设置 → 常规管理 → 文字转语音，把首选引擎改为 Google，并下载“英语（美国）”语音。':
+          '这台手机还没有英语语音：请到 设置 → 常规管理 → 文字转语音，首选引擎选 Google，并下载“英语（美国）”语音；建议用 Chrome 打开本网站。','ns')}},2500)};
+ if(T.speaking||T.pending){T.cancel();setTimeout(go,180)}else go()};
+})();</script></body></html>
